@@ -1,12 +1,9 @@
 {
   "name": "bulk-url-checker",
   "version": "1.0.0",
-  "description": "Bulk URL metadata checker using Netlify Functions",
-  "main": "index.js",
-  "scripts": {},
   "dependencies": {
-    "jsdom": "^22.1.0",
-    "node-fetch": "^3.3.2"
+    "chrome-aws-lambda": "^20.1.0",
+    "puppeteer-core": "^20.1.0"
   },
   "engines": {
     "node": "18.x"
