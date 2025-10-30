@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bulk SEO Checker</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h2 {
+    text-align: center;
+    color: #333;
+  }
+
+  textarea {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+  }
+
+  button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #28a745; /* Generate button green */
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  button:hover {
+    background-color: #218838;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    font-size: 14px;
+  }
+
+  th {
+    background-color: #007bff; /* Table header blue */
+    color: #fff;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tr.loading td {
+    color: #888;
+    font-style: italic;
+  }
+
+  .status-missing {
+    color: red;
+    font-weight: bold;
+  }
+
+  .status-present {
+    color: green;
+    font-weight: bold;
+  }
+
+  @media (max-width: 768px) {
+    th, td {
+      font-size: 12px;
+      padding: 8px;
+    }
+
+    textarea {
+      height: 100px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h2>Bulk SEO Checker</h2>
+<textarea id="urls" placeholder="Enter one URL per line"></textarea><br>
+<button onclick="checkSEO()">Check SEO</button>
+
+<table id="results">
+  <tr>
+    <th>URL</th>
+    <th>Title</th>
+    <th>Description</th>
+    <th>Canonical</th>
+    <th>AMP</th>
+    <th>Robots</th>
+  </tr>
+</table>
+
+<script>
+async function checkSEO() {
+  const urls = document.getElementById("urls").value.split("\n").filter(u => u);
+  const results = document.getElementById("results");
+
+  for (const url of urls) {
+    const row = results.insertRow();
+    row.classList.add("loading");
+    row.insertCell().innerText = url;
+    row.insertCell().innerText = "Loading...";
+    row.insertCell().innerText = "Loading...";
+    row.insertCell().innerText = "Loading...";
+    row.insertCell().innerText = "Loading...";
+    row.insertCell().innerText = "Loading...";
+
+    try {
+      const res = await fetch("/.netlify/functions/fetchSEO", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+
+      row.cells[1].innerHTML = data.title || '<span class="status-missing">Missing</span>';
+      row.cells[2].innerHTML = data.description || '<span class="status-missing">Missing</span>';
+      row.cells[3].innerHTML = data.canonical || '<span class="status-missing">Missing</span>';
+      row.cells[4].innerHTML = data.amp ? '<span class="status-present">Yes</span>' : '<span class="status-missing">No</span>';
+      row.cells[5].innerHTML = data.robots || '<span class="status-missing">Missing</span>';
+
+      row.classList.remove("loading");
+    } catch (err) {
+      row.cells[1].innerText = "Error fetching";
+      row.cells[2].innerText = "-";
+      row.cells[3].innerText = "-";
+      row.cells[4].innerText = "-";
+      row.cells[5].innerText = "-";
+      row.classList.remove("loading");
+    }
+  }
+}
+</script>
+
+</body>
+</html>
